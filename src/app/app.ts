@@ -35,9 +35,33 @@ import {MatIconModule} from '@angular/material/icon';
               <h1 class="text-[18px] font-[700] text-white leading-tight">
                 LoL Build Pro
               </h1>
-              <p class="text-[11px] text-[#4ade80] flex items-center gap-[6px] mt-0.5">
-                <span class="w-[6px] h-[6px] rounded-full bg-[#4ade80]" style="box-shadow: 0 0 8px #4ade80;"></span> Gemini AI Connected
-              </p>
+              <div class="flex items-center gap-[6px] mt-1 text-[11px]">
+                @if (config.configuredProviders().length > 0) {
+                  <div class="relative flex items-center bg-white/5 hover:bg-white/10 transition-colors border border-white/10 rounded-full pl-[8px] pr-[2px] py-[2px]">
+                    <span class="w-[6px] h-[6px] rounded-full mr-[6px] shrink-0" 
+                          [class.bg-[#4ade80]]="config.apiKey()" 
+                          [class.bg-red-400]="!config.apiKey()" 
+                          [style.boxShadow]="config.apiKey() ? '0 0 8px rgba(74,222,128,0.5)' : '0 0 8px rgba(239,68,68,0.5)'"></span> 
+                    
+                    <select [value]="config.aiProvider()" (change)="changeProvider($event)" 
+                            class="bg-transparent outline-none font-semibold uppercase tracking-wider text-[10px] cursor-pointer appearance-none pr-[16px] text-white/90" 
+                            title="Alternar Provedor de IA">
+                      @for (p of config.configuredProviders(); track p) {
+                        <option [value]="p" class="bg-[#0f0f13] text-white">{{ p }}</option>
+                      }
+                    </select>
+                    <mat-icon class="text-[14px] text-white/50 absolute right-[4px] pointer-events-none">expand_more</mat-icon>
+                  </div>
+                  <span class="text-white/40 text-[9px] bg-white/5 border border-white/5 px-[6px] py-[3px] rounded-full lowercase max-w-[120px] truncate" [title]="config.aiModel()">
+                    {{ config.aiModel() }}
+                  </span>
+                } @else {
+                  <div class="flex items-center gap-1.5 bg-red-500/10 border border-red-500/20 text-red-400 px-[8px] py-[2px] rounded-full text-[10px] font-semibold tracking-wider">
+                    <span class="w-[6px] h-[6px] rounded-full bg-red-400 shrink-0" style="box-shadow: 0 0 8px rgba(239,68,68,0.5)"></span>
+                    SEM PROVEDOR
+                  </div>
+                }
+              </div>
             </div>
           </div>
           
@@ -159,6 +183,12 @@ export class App {
     if (this.activeChampion()) {
       await this.onChampionSelected(this.activeChampion()!);
     }
+  }
+
+  changeProvider(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    // Type cast is safe because the options only contain AiProvider values
+    this.config.setActiveProvider(select.value as any);
   }
 
   async onChampionSelected(champion: Champion) {

@@ -34,11 +34,12 @@ export class AiService {
 
   async generateBuilds(championName: string, gameMode: 'Normal' | 'ARAM Desordem' = 'Normal', languageCode: string = 'en_US'): Promise<ChampionOptimalBuild> {
     const apiKey = this.configService.apiKey();
-    if (!apiKey) {
-      throw new Error('API Key do Gemini não configurada.');
-    }
+    const provider = this.configService.aiProvider();
+    const model = this.configService.aiModel();
 
-    const ai = new GoogleGenAI({apiKey});
+    if (!apiKey) {
+      throw new Error(`API Key não configurada para o provedor ${provider}.`);
+    }
 
     let prompt = `Você é um analista especialista em League of Legends. A resposta deve ser ESCRITA estritamente no idioma associado ao código de localização "${languageCode}" (ex: en_US = Inglês, pt_BR = Português Brasil).
     Recomende a MELHOR build atual para o campeão ${championName} no patch atual, no modo de jogo: ${gameMode}.
@@ -59,6 +60,18 @@ export class AiService {
         - Liste até 2 aprimoramentos Dourados (Gold).
         - Liste até 2 aprimoramentos Prateados (Silver).`;
     }
+
+    if (provider === 'gemini') {
+      return this.generateWithGemini(prompt, apiKey, model, gameMode);
+    } else if (provider === 'groq' || provider === 'openai') {
+      return this.generateWithOpenAICompatible(provider, prompt, apiKey, model, gameMode);
+    } else {
+      throw new Error(`Provedor de IA desconhecido: ${provider}`);
+    }
+  }
+
+  private async generateWithGemini(prompt: string, apiKey: string, model: string, gameMode: string): Promise<ChampionOptimalBuild> {
+    const ai = new GoogleGenAI({apiKey});
 
     const itemSchema = {
       type: Type.OBJECT,
@@ -109,7 +122,7 @@ export class AiService {
     }
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: model || 'gemini-2.5-flash',
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
@@ -127,5 +140,59 @@ export class AiService {
     }
 
     return JSON.parse(text) as ChampionOptimalBuild;
+  }
+
+  private async generateWithOpenAICompatible(provider: string, prompt: string, apiKey: string, model: string, gameMode: string): Promise<ChampionOptimalBuild> {
+    const endpoint = provider === 'groq' ? 'https://api.groq.com/openai/v1/chat/completions' : 'https://api.openai.com/v1/chat/completions';
+    
+    let jsonFormatStr = `
+    VOCÊ DEVE RETORNAR APENAS UM JSON VÁLIDO. NÃO INCLUA MAIS NADA NO TEXTO.
+    O JSON deve seguir a seguinte estrutura:
+    {
+      "buildName": "string",
+      "description": "string",
+      "runes": "string",
+      "skillOrder": "string",
+      "items": [
+        { "id": "string", "name": "string", "reason": "string" }
+      ]
+    `;
+
+    if (gameMode === 'ARAM Desordem') {
+      jsonFormatStr += `,
+      "augments": {
+        "prismatic": [ { "name": "string", "reason": "string" } ],
+        "gold": [ { "name": "string", "reason": "string" } ],
+        "silver": [ { "name": "string", "reason": "string" } ]
+      }`;
+    }
+    
+    jsonFormatStr += "\n}";
+    
+    prompt = prompt + "\n\n" + jsonFormatStr;
+
+    const body = {
+      model: model,
+      messages: [{ role: 'user', content: prompt }],
+      response_format: { type: "json_object" }
+    };
+
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`Erro na API (${provider}): ${err}`);
+    }
+
+    const data = await res.json();
+    const content = data.choices[0].message.content;
+    return JSON.parse(content) as ChampionOptimalBuild;
   }
 }
