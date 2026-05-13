@@ -18,9 +18,13 @@ import {ConfigService} from '../services/config.service';
             </button>
           </div>
           
-          <p class="text-sm text-gray-400">
+          <p class="text-[13px] text-[var(--color-text-secondary)]">
             Forneça a sua chave de API do Google Gemini para habilitar as recomendações geradas por IA. A chave é salva apenas no seu navegador (localStorage).
           </p>
+          
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-[12px] text-[var(--color-accent-cyan)] hover:text-white transition-colors flex items-center gap-1 w-fit">
+            Obter uma chave de API <mat-icon class="text-[14px]">open_in_new</mat-icon>
+          </a>
 
           <div class="flex flex-col gap-2 relative">
             <label class="text-xs font-semibold text-gray-300 uppercase tracking-widest">Gemini API Key</label>
