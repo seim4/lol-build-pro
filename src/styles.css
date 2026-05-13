@@ -1,0 +1,59 @@
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", -apple-system, sans-serif;
+  
+  --color-glass-bg: rgba(20, 20, 25, 0.7);
+  --color-glass-border: rgba(255, 255, 255, 0.12);
+  --color-accent-cyan: #00d4ff;
+  --color-accent-gold: #c8aa6e;
+  --color-text-primary: #f0f0f5;
+  --color-text-secondary: #9393a6;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #0f0f13;
+  color: var(--color-text-primary);
+  background-image: radial-gradient(circle at 50% -20%, #1e2235 0%, #0f0f13 70%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+@layer utilities {
+  .glass-panel {
+    background: var(--color-glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--color-glass-border);
+    border-radius: 12px;
+  }
+  
+  .glass-card {
+    background: var(--color-glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--color-glass-border);
+    border-radius: 12px;
+    transition: all 0.3s;
+  }
+  
+  .glass-card:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .glass-input {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--color-glass-border);
+    color: var(--color-text-primary);
+    border-radius: 10px;
+    @apply focus:outline-none transition-all;
+  }
+  
+  .glass-input:focus {
+    border-color: var(--color-accent-cyan);
+    box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.1);
+  }
+}
+
