@@ -17,7 +17,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          # Remova a linha 'cache: npm' se não tiver o arquivo lock
 
       - name: Instalar dependências
         run: npm ci # 'npm ci' é mais seguro para ambientes de CI/CD
