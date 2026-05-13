@@ -4,6 +4,7 @@ import {AsyncPipe} from '@angular/common';
 import {MatIconModule} from '@angular/material/icon';
 import {debounceTime, distinctUntilChanged, Subject, takeUntil, map, combineLatest, startWith} from 'rxjs';
 import {RiotDataService, Champion} from '../services/riot-data.service';
+import {I18nService} from '../services/i18n.service';
 
 @Component({
   selector: 'app-champion-search',
@@ -17,7 +18,7 @@ import {RiotDataService, Champion} from '../services/riot-data.service';
           [formControl]="searchControl"
           type="text"
           class="glass-input w-full pl-[56px] pr-[20px] py-[14px] text-[16px] placeholder-[var(--color-text-secondary)]"
-          placeholder="Search Champions..."
+          [placeholder]="t('app.search_placeholder')"
           (focus)="isFocused.set(true)"
           (blur)="onBlur()"
         />
@@ -46,6 +47,9 @@ import {RiotDataService, Champion} from '../services/riot-data.service';
 })
 export class ChampionSearchComponent implements OnDestroy {
   private riotData = inject(RiotDataService);
+  private i18n = inject(I18nService);
+  t = (key: string) => this.i18n.t(key);
+  
   private destroy$ = new Subject<void>();
 
   searchControl = new FormControl('');

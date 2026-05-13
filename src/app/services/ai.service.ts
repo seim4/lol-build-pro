@@ -35,7 +35,7 @@ export interface ChampionBuilds {
 export class AiService {
   private configService = inject(ConfigService);
 
-  async generateBuilds(championName: string, gameMode: 'Normal' | 'ARAM Desordem' = 'Normal'): Promise<ChampionBuilds> {
+  async generateBuilds(championName: string, gameMode: 'Normal' | 'ARAM Desordem' = 'Normal', languageCode: string = 'en_US'): Promise<ChampionBuilds> {
     const apiKey = this.configService.apiKey();
     if (!apiKey) {
       throw new Error('API Key do Gemini não configurada.');
@@ -43,7 +43,8 @@ export class AiService {
 
     const ai = new GoogleGenAI({apiKey});
 
-    let prompt = `Você é um analista especialista em League of Legends. Recomende 3 builds diferentes para o campeão ${championName} no patch atual, no modo de jogo: ${gameMode}.
+    let prompt = `Você é um analista especialista em League of Legends. A resposta deve ser ESCRITA estritamente no idioma associado ao código de localização "${languageCode}" (ex: en_US = Inglês, pt_BR = Português Brasil).
+    Recomende 3 builds diferentes para o campeão ${championName} no patch atual, no modo de jogo: ${gameMode}.
     As 3 builds são:
     1. antiTank: Otimizada para derreter tanques (HP alto, Armadura, MR).
     2. antiSquishy: Focada em burst e letalidade para deletar alvos frágeis.

@@ -1,7 +1,7 @@
 import {Injectable, inject, PLATFORM_ID} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {isPlatformBrowser} from '@angular/common';
-import {BehaviorSubject, Observable, of, tap, switchMap, catchError} from 'rxjs';
+import {BehaviorSubject, Observable, of, tap, switchMap, catchError, combineLatest} from 'rxjs';
 
 export interface Champion {
   id: string;
@@ -42,22 +42,35 @@ export class RiotDataService {
   private selectedVersionSubject = new BehaviorSubject<string>('');
   selectedVersion$ = this.selectedVersionSubject.asObservable();
 
-  champions$: Observable<Champion[]> = this.selectedVersion$.pipe(
-    switchMap(version => {
-      if (!version) return of([]);
-      return this.fetchChampions(version);
+  private languagesSubject = new BehaviorSubject<string[]>([]);
+  languages$ = this.languagesSubject.asObservable();
+
+  private selectedLanguageSubject = new BehaviorSubject<string>('en_US');
+  selectedLanguage$ = this.selectedLanguageSubject.asObservable();
+
+  champions$: Observable<Champion[]> = combineLatest([
+    this.selectedVersion$,
+    this.selectedLanguage$
+  ]).pipe(
+    switchMap(([version, language]) => {
+      if (!version || !language) return of([]);
+      return this.fetchChampions(version, language);
     })
   );
 
-  items$: Observable<Record<string, Item>> = this.selectedVersion$.pipe(
-    switchMap(version => {
-      if (!version) return of({});
-      return this.fetchItems(version);
+  items$: Observable<Record<string, Item>> = combineLatest([
+    this.selectedVersion$,
+    this.selectedLanguage$
+  ]).pipe(
+    switchMap(([version, language]) => {
+      if (!version || !language) return of({});
+      return this.fetchItems(version, language);
     })
   );
 
   constructor() {
     this.loadVersions();
+    this.loadLanguages();
   }
 
   private loadVersions() {
@@ -71,18 +84,34 @@ export class RiotDataService {
     );
   }
 
+  private loadLanguages() {
+    this.http.get<string[]>('https://ddragon.leagueoflegends.com/cdn/languages.json').subscribe(
+      languages => {
+        this.languagesSubject.next(languages);
+      }
+    );
+  }
+
   setVersion(version: string) {
     this.selectedVersionSubject.next(version);
   }
 
-  private fetchChampions(version: string): Observable<Champion[]> {
-    const cacheKey = `champions_${version}`;
+  get currentLanguage(): string {
+    return this.selectedLanguageSubject.value;
+  }
+
+  setLanguage(language: string) {
+    this.selectedLanguageSubject.next(language);
+  }
+
+  private fetchChampions(version: string, language: string): Observable<Champion[]> {
+    const cacheKey = `champions_${version}_${language}`;
     const cached = this.getFromCache(cacheKey);
     if (cached) {
       return of(cached);
     }
 
-    return this.http.get<{data: Record<string, Champion>}>(`https://ddragon.leagueoflegends.com/cdn/${version}/data/pt_BR/champion.json`).pipe(
+    return this.http.get<{data: Record<string, Champion>}>(`https://ddragon.leagueoflegends.com/cdn/${version}/data/${language}/champion.json`).pipe(
       switchMap(res => {
         const championsList = Object.values(res.data);
         this.saveToCache(cacheKey, championsList);
@@ -92,14 +121,14 @@ export class RiotDataService {
     );
   }
 
-  private fetchItems(version: string): Observable<Record<string, Item>> {
-    const cacheKey = `items_${version}`;
+  private fetchItems(version: string, language: string): Observable<Record<string, Item>> {
+    const cacheKey = `items_${version}_${language}`;
     const cached = this.getFromCache(cacheKey);
     if (cached) {
       return of(cached);
     }
 
-    return this.http.get<{data: Record<string, Item>}>(`https://ddragon.leagueoflegends.com/cdn/${version}/data/pt_BR/item.json`).pipe(
+    return this.http.get<{data: Record<string, Item>}>(`https://ddragon.leagueoflegends.com/cdn/${version}/data/${language}/item.json`).pipe(
       switchMap(res => {
         this.saveToCache(cacheKey, res.data);
         return of(res.data);
@@ -124,7 +153,6 @@ export class RiotDataService {
 
   private saveToCache(key: string, data: any) {
     if (isPlatformBrowser(this.platformId)) {
-      // Clear old versions cache to avoid localStorage quota issues
       const keysToRemove = [];
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);

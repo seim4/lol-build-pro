@@ -2,6 +2,7 @@ import {Component, inject, signal} from '@angular/core';
 import {ReactiveFormsModule, FormControl, Validators} from '@angular/forms';
 import {MatIconModule} from '@angular/material/icon';
 import {ConfigService} from '../services/config.service';
+import {I18nService} from '../services/i18n.service';
 
 @Component({
   selector: 'app-config-dialog',
@@ -12,18 +13,18 @@ import {ConfigService} from '../services/config.service';
       <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
         <div class="glass-panel w-full max-w-md rounded-2xl p-6 flex flex-col gap-4">
           <div class="flex items-center justify-between">
-            <h2 class="text-xl font-display font-semibold">Configuração (BYOK)</h2>
+            <h2 class="text-xl font-display font-semibold">{{ t('config.title') }}</h2>
             <button (click)="close()" class="text-gray-400 hover:text-white transition-colors">
               <mat-icon>close</mat-icon>
             </button>
           </div>
           
           <p class="text-[13px] text-[var(--color-text-secondary)]">
-            Forneça a sua chave de API do Google Gemini para habilitar as recomendações geradas por IA. A chave é salva apenas no seu navegador (localStorage).
+            {{ t('config.description') }}
           </p>
           
           <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-[12px] text-[var(--color-accent-cyan)] hover:text-white transition-colors flex items-center gap-1 w-fit">
-            Obter uma chave de API <mat-icon class="text-[14px]">open_in_new</mat-icon>
+            {{ t('config.get_key') }} <mat-icon class="text-[14px]">open_in_new</mat-icon>
           </a>
 
           <div class="flex flex-col gap-2 relative">
@@ -40,13 +41,13 @@ import {ConfigService} from '../services/config.service';
             <button 
               (click)="close()" 
               class="px-4 py-2 rounded-xl font-medium text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-all">
-              Cancelar
+              {{ t('config.cancel') }}
             </button>
             <button 
               (click)="save()" 
               [disabled]="keyControl.invalid"
               class="px-4 py-2 rounded-xl font-medium text-sm text-white bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md shadow-blue-500/20">
-              Salvar
+              {{ t('config.save') }}
             </button>
           </div>
         </div>
@@ -56,6 +57,9 @@ import {ConfigService} from '../services/config.service';
 })
 export class ConfigDialogComponent {
   private configService = inject(ConfigService);
+  private i18n = inject(I18nService);
+  t = (key: string) => this.i18n.t(key);
+
   isOpen = signal(false);
   
   keyControl = new FormControl('', [Validators.required]);

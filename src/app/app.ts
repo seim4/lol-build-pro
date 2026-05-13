@@ -1,11 +1,13 @@
 import {ChangeDetectionStrategy, Component, inject, signal, ViewChild} from '@angular/core';
 import {ChampionSearchComponent} from './components/champion-search';
 import {VersionSelectorComponent} from './components/version-selector';
+import {LanguageSelectorComponent} from './components/language-selector';
 import {ConfigDialogComponent} from './components/config-dialog';
 import {BuildPanelComponent} from './components/build-panel';
 import {Champion, RiotDataService} from './services/riot-data.service';
 import {AiService, ChampionBuilds} from './services/ai.service';
 import {ConfigService} from './services/config.service';
+import {I18nService} from './services/i18n.service';
 import {MatIconModule} from '@angular/material/icon';
 
 @Component({
@@ -14,6 +16,7 @@ import {MatIconModule} from '@angular/material/icon';
   imports: [
     ChampionSearchComponent,
     VersionSelectorComponent,
+    LanguageSelectorComponent,
     ConfigDialogComponent,
     BuildPanelComponent,
     MatIconModule
@@ -39,13 +42,14 @@ import {MatIconModule} from '@angular/material/icon';
           </div>
           
           <div class="flex items-center gap-[10px] text-[14px]">
+            <app-language-selector />
             <app-version-selector />
             
             <button 
               (click)="configDialog.open()"
               class="glass-panel flex items-center gap-2 px-[16px] py-[8px] text-white text-[12px] cursor-pointer ml-[10px] transition-colors hover:border-white/20">
               <mat-icon class="text-[16px]">vpn_key</mat-icon>
-              <span>Config API</span>
+              <span>{{ t('app.config_key') }}</span>
               @if (!config.apiKey()) {
                 <span class="w-[6px] h-[6px] rounded-full bg-red-500 animate-pulse" style="box-shadow: 0 0 8px #ef4444;"></span>
               }
@@ -63,12 +67,12 @@ import {MatIconModule} from '@angular/material/icon';
             <button 
               (click)="setGameMode('Normal')"
               [class]="gameMode() === 'Normal' ? 'px-4 py-2 rounded-lg text-sm font-medium transition-colors text-white bg-white/10' : 'px-4 py-2 rounded-lg text-sm font-medium transition-colors text-gray-400 hover:text-white'">
-              Normal
+              {{ t('app.normal_mode') }}
             </button>
             <button 
               (click)="setGameMode('ARAM Desordem')"
               [class]="gameMode() === 'ARAM Desordem' ? 'px-4 py-2 rounded-lg text-sm font-medium transition-colors text-white bg-white/10 flex items-center gap-2' : 'px-4 py-2 rounded-lg text-sm font-medium transition-colors text-gray-400 hover:text-white flex items-center gap-2'">
-              <mat-icon class="text-[16px]">shuffle</mat-icon> ARAM
+              <mat-icon class="text-[16px]">shuffle</mat-icon> {{ t('app.aram_mode') }}
             </button>
           </div>
 
@@ -78,7 +82,7 @@ import {MatIconModule} from '@angular/material/icon';
             <div class="flex items-center gap-[12px] px-[16px] py-[8px] rounded-[8px] min-w-[180px]" style="background: rgba(200, 170, 110, 0.1); border: 1px solid var(--color-accent-gold);">
               <div class="w-[32px] h-[32px] rounded-[4px] border border-[var(--color-accent-gold)] bg-cover bg-center" [style.backgroundImage]="'url(' + getChampionImageUrl(activeChampion()!.id) + ')'"></div>
               <div>
-                <p class="text-[10px] opacity-60 uppercase leading-tight">Selected</p>
+                <p class="text-[10px] opacity-60 uppercase leading-tight">{{ t('app.selected') }}</p>
                 <p class="font-[700] text-[var(--color-accent-gold)] leading-tight">{{ activeChampion()?.name }}</p>
               </div>
             </div>
@@ -92,7 +96,7 @@ import {MatIconModule} from '@angular/material/icon';
               <div class="absolute inset-2 rounded-full border-r-2 border-[var(--color-accent-gold)] animate-spin" style="animation-direction: reverse;"></div>
               <mat-icon class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-50">auto_awesome</mat-icon>
             </div>
-            <p class="text-[11px] text-[var(--color-accent-cyan)] uppercase tracking-[2px] font-[700]">Analisando o Meta...</p>
+            <p class="text-[11px] text-[var(--color-accent-cyan)] uppercase tracking-[2px] font-[700]">{{ t('app.analyzing') }}</p>
           </div>
         }
 
@@ -100,10 +104,10 @@ import {MatIconModule} from '@angular/material/icon';
           <div class="mt-8 glass-panel border-red-500/30 bg-red-500/5 p-4 rounded-xl flex items-start gap-3 w-full">
             <mat-icon class="text-red-400">error_outline</mat-icon>
             <div>
-              <h4 class="text-red-200 font-medium font-display">Erro ao gerar builds</h4>
+              <h4 class="text-red-200 font-medium font-display">{{ t('app.error_title') }}</h4>
               <p class="text-sm text-red-300/80 mt-1">{{ errorMsg() }}</p>
               @if (errorMsg()?.includes('API Key')) {
-                 <button (click)="configDialog.open()" class="mt-2 text-[12px] bg-red-500/20 text-red-100 px-3 py-1 rounded-md hover:bg-red-500/30 transition-colors">Configurar API Key</button>
+                 <button (click)="configDialog.open()" class="mt-2 text-[12px] bg-red-500/20 text-red-100 px-3 py-1 rounded-md hover:bg-red-500/30 transition-colors">{{ t('app.config_key') }}</button>
               }
             </div>
           </div>
@@ -116,7 +120,7 @@ import {MatIconModule} from '@angular/material/icon';
         }
         
         <footer class="text-center text-[10px] text-[var(--color-text-secondary)] pt-[10px] pb-[10px] mt-auto">
-          Generated via Gemini Pro AI & Riot Games Data Dragon API
+          {{ t('app.footer') }}
         </footer>
       </main>
 
@@ -130,6 +134,9 @@ export class App {
   private aiService = inject(AiService);
   private riotData = inject(RiotDataService);
   config = inject(ConfigService);
+  
+  i18n = inject(I18nService);
+  t = (key: string) => this.i18n.t(key);
   
   activeChampion = signal<Champion | null>(null);
   builds = signal<ChampionBuilds | null>(null);
@@ -168,7 +175,8 @@ export class App {
     this.isLoading.set(true);
     
     try {
-      const result = await this.aiService.generateBuilds(champion.name, this.gameMode());
+      const language = this.riotData.currentLanguage;
+      const result = await this.aiService.generateBuilds(champion.name, this.gameMode(), language);
       this.builds.set(result);
     } catch (err: any) {
       console.error(err);
