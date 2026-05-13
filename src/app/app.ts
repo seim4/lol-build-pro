@@ -28,8 +28,8 @@ import {MatIconModule} from '@angular/material/icon';
       <nav class="w-full border-b border-[var(--color-glass-border)] sticky top-0 z-40" style="background: var(--color-glass-bg); backdrop-filter: blur(12px);">
         <div class="max-w-[1024px] w-full mx-auto px-[24px] h-[60px] flex items-center justify-between">
           <div class="flex items-center gap-[12px]">
-            <div class="w-[40px] h-[40px] rounded-[8px] flex items-center justify-center text-white font-[800] text-[20px]" style="background: linear-gradient(135deg, var(--color-accent-cyan), #7000ff);">
-              L
+            <div class="w-[40px] h-[40px] rounded-[8px] flex items-center justify-center p-[8px]" style="background: linear-gradient(135deg, var(--color-accent-cyan), #7000ff);">
+              <img src="https://cdn.simpleicons.org/leagueoflegends/white" alt="LoL Icon" class="w-full h-full object-contain drop-shadow-md" />
             </div>
             <div>
               <h1 class="text-[18px] font-[700] text-white leading-tight">

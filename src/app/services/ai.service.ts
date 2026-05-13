@@ -49,7 +49,8 @@ export class AiService {
     - O nome da árvore principal de runas com a runa principal (ex: "Precisão - Conquistador").
     - A ordem de evolução das habilidades (ex: "Q -> E -> W. Max Q, depois E.").
     - A lista e ordem de compra de 6 itens finais completos necessários.
-    ATENÇÃO: O 'id' do item deve ser o ID estrito do item no Data Dragon da Riot Games (ex: "3031" para Gume do Infinito, "3153" para Espada do Rei Destruído, "3089" para Rabadon, "3157" para Zhonyas). Se não souber o ID numérico exato do Data Dragon, aproxime seu palpite, mas priorize os números de 4 dígitos clássicos.`;
+    ATENÇÃO: O 'id' do item deve ser o ID estrito do item no Data Dragon da Riot Games (ex: "3031" para Gume do Infinito, "3153" para Espada do Rei Destruído, "3089" para Rabadon, "3157" para Zhonyas). Se não souber o ID numérico exato do Data Dragon, aproxime seu palpite, mas priorize os números de 4 dígitos clássicos.
+    MUITO IMPORTANTE: Recomende APENAS itens que existem e estão disponíveis no modo de jogo ${gameMode} (Exemplo: Não recomende Anjo Guardião ou Mejai no ARAM, etc).`;
 
     if (gameMode === 'ARAM Desordem') {
       prompt += `

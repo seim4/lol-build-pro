@@ -53,7 +53,7 @@ import {I18nService} from '../services/i18n.service';
             @for (item of build()?.items; track item.id; let idx = $index) {
               <div class="flex gap-[12px] bg-white/5 hover:bg-white/10 p-[12px] rounded-xl transition-colors border border-white/5">
                 <div class="relative shrink-0">
-                   <img [src]="getItemImageUrl(item.id)" [alt]="item.name" class="w-[48px] h-[48px] rounded-[8px] border border-white/20 bg-[#050505]" referrerpolicy="no-referrer" (error)="handleImgError($event)">
+                   <img [src]="getItemImageUrl(item.id, item.name)" [alt]="item.name" class="w-[48px] h-[48px] rounded-[8px] border border-white/20 bg-[#050505]" referrerpolicy="no-referrer" (error)="handleImgError($event)">
                    <div class="absolute -top-2 -left-2 w-[20px] h-[20px] bg-[#222] border border-white/20 rounded-full flex items-center justify-center text-[10px] font-bold text-white z-10">{{ idx + 1 }}</div>
                 </div>
                 <div class="flex flex-col justify-center">
@@ -113,14 +113,38 @@ export class BuildPanelComponent {
   build = input<ChampionOptimalBuild | null>(null);
 
   selectedVersion = '';
+  itemsMap: Record<string, any> = {};
 
   constructor() {
     this.riotData.selectedVersion$.subscribe(v => this.selectedVersion = v);
+    this.riotData.items$.subscribe(items => this.itemsMap = items);
   }
 
-  getItemImageUrl(itemId: string): string {
-    const cleanId = itemId.toString().replace(/[^0-9]/g, '');
-    return `https://ddragon.leagueoflegends.com/cdn/${this.selectedVersion}/img/item/${cleanId}.png`;
+  getItemImageUrl(itemId: string, itemName: string): string {
+    let finalId = itemId.toString().replace(/[^0-9]/g, '');
+    
+    if (!this.itemsMap[finalId]) {
+      const targetName = (itemName || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      let bestMatchId = finalId;
+      let highestScore = 0;
+
+      for (const [id, item] of Object.entries(this.itemsMap)) {
+        const currentName = item.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (currentName === targetName) {
+          bestMatchId = id;
+          break;
+        } else if (currentName.includes(targetName) || targetName.includes(currentName)) {
+           const score = currentName.length > targetName.length ? targetName.length / currentName.length : currentName.length / targetName.length;
+           if (score > highestScore && score > 0.4) {
+             highestScore = score;
+             bestMatchId = id;
+           }
+        }
+      }
+      finalId = bestMatchId;
+    }
+
+    return `https://ddragon.leagueoflegends.com/cdn/${this.selectedVersion}/img/item/${finalId}.png`;
   }
 
   handleImgError(event: any) {
