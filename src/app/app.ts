@@ -208,11 +208,43 @@ export class App {
       const language = this.riotData.currentLanguage;
       const result = await this.aiService.generateBuilds(champion.name, this.gameMode(), language);
       this.build.set(result);
+      this.playNotificationSound();
     } catch (err: any) {
       console.error(err);
       this.errorMsg.set(err.message || 'Ocorreu um erro desconhecido.');
     } finally {
       this.isLoading.set(false);
+    }
+  }
+
+  private playNotificationSound() {
+    try {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContextClass) return;
+      
+      const ctx = new AudioContextClass();
+      const playTone = (freq: number, startTime: number, duration: number, type: OscillatorType = 'sine') => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc.type = type;
+        osc.frequency.value = freq;
+        
+        gain.gain.setValueAtTime(0, startTime);
+        gain.gain.linearRampToValueAtTime(0.15, startTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+        
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+      };
+
+      const now = ctx.currentTime;
+      playTone(523.25, now, 0.15); // C5
+      playTone(659.25, now + 0.15, 0.4); // E5
+    } catch (e) {
+      console.error('Falha ao reproduzir som de notificação', e);
     }
   }
 }
