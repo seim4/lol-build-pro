@@ -24,7 +24,7 @@ jobs:
 
       - name: Build da aplicação
         # Substitua NOME_DO_REPOSITORIO pelo nome do seu projeto no GitHub
-        run: npx ng build --configuration production --base-href /
+        run: npx ng build --configuration production --base-href /lol-build-pro/
 
       - name: Deploy para GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
