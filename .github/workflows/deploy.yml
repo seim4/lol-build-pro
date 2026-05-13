@@ -23,7 +23,7 @@ jobs:
 
       - name: Build da aplicação
         # Substitua 'NOME_DO_REPOSITORIO' pelo nome do seu projeto no GitHub
-        run: npx ng build --configuration production --base-href /ai-studio-angular-app/
+        run: npx ng build --configuration production --base-href /
 
       - name: Deploy para GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
