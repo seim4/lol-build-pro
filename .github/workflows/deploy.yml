@@ -20,7 +20,7 @@ jobs:
           # Remova a linha 'cache: npm' se não tiver o arquivo lock
 
       - name: Instalar dependências
-        run: npm ci # 'npm ci' é mais seguro para ambientes de CI/CD
+        run: npm install
 
       - name: Build da aplicação
         # Substitua NOME_DO_REPOSITORIO pelo nome do seu projeto no GitHub
