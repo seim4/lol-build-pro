@@ -3,7 +3,7 @@ name: Deploy Angular to GitHub Pages
 on:
   push:
     branches:
-      - main # Ou a branch principal do seu projeto
+      - main
 
 jobs:
   build-and-deploy:
@@ -16,17 +16,18 @@ jobs:
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Use a versão do Node compatível com seu Angular
+          node-version: '20'
+          cache: 'npm'
 
       - name: Instalar dependências
-        run: npm install
+        run: npm ci # 'npm ci' é mais seguro para ambientes de CI/CD
 
       - name: Build da aplicação
-        # Substitua 'NOME_DO_REPOSITORIO' pelo nome do seu projeto no GitHub
-        run: npx ng build --configuration production --base-href /
+        # Substitua NOME_DO_REPOSITORIO pelo nome do seu projeto no GitHub
+        run: npx ng build --configuration production --base-href /lol-build-pro/
 
       - name: Deploy para GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: dist/ai-studio-angular-app/browser # Verifique se o caminho do build está correto (Angular 17+ usa /browser)
+          folder: dist/app/browser # Baseado no nome do seu projeto "app" no angular.json
           branch: gh-pages
