@@ -13,20 +13,17 @@ export interface Augment {
   reason: string;
 }
 
-export interface BuildSetup {
-  items: BuildItem[];
+export interface ChampionOptimalBuild {
+  buildName: string;
+  description: string;
   runes: string;
+  skillOrder: string;
+  items: BuildItem[];
   augments?: {
     prismatic: Augment[];
     gold: Augment[];
     silver: Augment[];
   };
-}
-
-export interface ChampionBuilds {
-  antiTank: BuildSetup;
-  antiSquishy: BuildSetup;
-  poke: BuildSetup;
 }
 
 @Injectable({
@@ -35,7 +32,7 @@ export interface ChampionBuilds {
 export class AiService {
   private configService = inject(ConfigService);
 
-  async generateBuilds(championName: string, gameMode: 'Normal' | 'ARAM Desordem' = 'Normal', languageCode: string = 'en_US'): Promise<ChampionBuilds> {
+  async generateBuilds(championName: string, gameMode: 'Normal' | 'ARAM Desordem' = 'Normal', languageCode: string = 'en_US'): Promise<ChampionOptimalBuild> {
     const apiKey = this.configService.apiKey();
     if (!apiKey) {
       throw new Error('API Key do Gemini não configurada.');
@@ -44,15 +41,14 @@ export class AiService {
     const ai = new GoogleGenAI({apiKey});
 
     let prompt = `Você é um analista especialista em League of Legends. A resposta deve ser ESCRITA estritamente no idioma associado ao código de localização "${languageCode}" (ex: en_US = Inglês, pt_BR = Português Brasil).
-    Recomende 3 builds diferentes para o campeão ${championName} no patch atual, no modo de jogo: ${gameMode}.
-    As 3 builds são:
-    1. antiTank: Otimizada para derreter tanques (HP alto, Armadura, MR).
-    2. antiSquishy: Focada em burst e letalidade para deletar alvos frágeis.
-    3. poke (ou Safe/Sustain): Focada em alcance, sobrevivência ou sustain.
-
-    Para cada build, forneça:
+    Recomende a MELHOR build atual para o campeão ${championName} no patch atual, no modo de jogo: ${gameMode}.
+    
+    A resposta deve conter:
+    - O nome da build (ex: "Build Letalidade Anti-Squishy").
+    - Uma breve descrição estratégica de como e por que usar esta build.
     - O nome da árvore principal de runas com a runa principal (ex: "Precisão - Conquistador").
-    - Lista de 6 itens finais completos necessários.
+    - A ordem de evolução das habilidades (ex: "Q -> E -> W. Max Q, depois E.").
+    - A lista e ordem de compra de 6 itens finais completos necessários.
     ATENÇÃO: O 'id' do item deve ser o ID estrito do item no Data Dragon da Riot Games (ex: "3031" para Gume do Infinito, "3153" para Espada do Rei Destruído, "3089" para Rabadon, "3157" para Zhonyas). Se não souber o ID numérico exato do Data Dragon, aproxime seu palpite, mas priorize os números de 4 dígitos clássicos.`;
 
     if (gameMode === 'ARAM Desordem') {
@@ -85,18 +81,21 @@ export class AiService {
       }
     };
 
-    const buildSetupSchemaProperties: Record<string, any> = {
+    const buildSchemaProperties: Record<string, any> = {
+      buildName: {type: Type.STRING},
+      description: {type: Type.STRING},
       runes: {type: Type.STRING},
+      skillOrder: {type: Type.STRING},
       items: {
         type: Type.ARRAY,
         items: itemSchema
       }
     };
 
-    const requiredBuildSetupProperties = ['runes', 'items'];
+    const requiredBuildProperties = ['buildName', 'description', 'runes', 'skillOrder', 'items'];
 
     if (gameMode === 'ARAM Desordem') {
-      buildSetupSchemaProperties['augments'] = {
+      buildSchemaProperties['augments'] = {
         type: Type.OBJECT,
         properties: {
           prismatic: augmentSchema,
@@ -105,14 +104,8 @@ export class AiService {
         },
         required: ['prismatic', 'gold', 'silver']
       };
-      requiredBuildSetupProperties.push('augments');
+      requiredBuildProperties.push('augments');
     }
-
-    const buildSetupSchema = {
-      type: Type.OBJECT,
-      properties: buildSetupSchemaProperties,
-      required: requiredBuildSetupProperties
-    };
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
@@ -121,12 +114,8 @@ export class AiService {
         responseMimeType: 'application/json',
         responseSchema: {
           type: Type.OBJECT,
-          properties: {
-            antiTank: buildSetupSchema,
-            antiSquishy: buildSetupSchema,
-            poke: buildSetupSchema
-          },
-          required: ['antiTank', 'antiSquishy', 'poke']
+          properties: buildSchemaProperties,
+          required: requiredBuildProperties
         }
       }
     });
@@ -136,6 +125,6 @@ export class AiService {
       throw new Error('Sem resposta do Gemini');
     }
 
-    return JSON.parse(text) as ChampionBuilds;
+    return JSON.parse(text) as ChampionOptimalBuild;
   }
 }

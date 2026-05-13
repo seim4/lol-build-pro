@@ -18,16 +18,13 @@ const EN = {
   'config.get_key': 'Get an API key',
   'config.cancel': 'Cancel',
   'config.save': 'Save',
-  'build.anti_squishy': 'Anti-Squishy',
-  'build.burst_focus': 'Burst Damage Focus',
-  'build.anti_tank': 'Anti-Tank',
-  'build.sustained_combat': 'Sustained Combat',
-  'build.poke_safe': 'Poke / Safe',
-  'build.infinite_scaling': 'Infinite Scaling / Utility',
   'build.augments': 'Augments',
   'build.prismatic': 'Prismatic',
   'build.gold': 'Gold',
   'build.silver': 'Silver',
+  'build.best_build': 'Best Build',
+  'build.skill_order': 'Skill Order',
+  'build.item_order': 'Item Order',
   'selector.current_patch': 'Current Patch:'
 };
 
@@ -47,16 +44,13 @@ const PT = {
   'config.get_key': 'Obter chave de API',
   'config.cancel': 'Cancelar',
   'config.save': 'Salvar',
-  'build.anti_squishy': 'Anti-Papel',
-  'build.burst_focus': 'Foco em Dano Explosivo',
-  'build.anti_tank': 'Anti-Tanque',
-  'build.sustained_combat': 'Combate Sustentado',
-  'build.poke_safe': 'Poke / Seguro',
-  'build.infinite_scaling': 'Escalonamento / Utilidade',
   'build.augments': 'Aprimoramentos',
   'build.prismatic': 'Prismático',
   'build.gold': 'Ouro',
   'build.silver': 'Prata',
+  'build.best_build': 'Melhor Build',
+  'build.skill_order': 'Ordem das Habilidades',
+  'build.item_order': 'Ordem dos Itens',
   'selector.current_patch': 'Patch Atual:'
 };
 
@@ -76,16 +70,13 @@ const ES = {
   'config.get_key': 'Obtener clave de API',
   'config.cancel': 'Cancelar',
   'config.save': 'Guardar',
-  'build.anti_squishy': 'Anti-Blandos',
-  'build.burst_focus': 'Enfoque de Daño Explosivo',
-  'build.anti_tank': 'Anti-Tanques',
-  'build.sustained_combat': 'Combate Sostenido',
-  'build.poke_safe': 'Desgaste / Seguro',
-  'build.infinite_scaling': 'Escalado / Utilidad',
   'build.augments': 'Aumentos',
   'build.prismatic': 'Prismático',
   'build.gold': 'Oro',
   'build.silver': 'Plata',
+  'build.best_build': 'Mejor Build',
+  'build.skill_order': 'Orden de Habilidades',
+  'build.item_order': 'Orden de Objetos',
   'selector.current_patch': 'Parche Actual:'
 };
 

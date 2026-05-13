@@ -5,7 +5,7 @@ import {LanguageSelectorComponent} from './components/language-selector';
 import {ConfigDialogComponent} from './components/config-dialog';
 import {BuildPanelComponent} from './components/build-panel';
 import {Champion, RiotDataService} from './services/riot-data.service';
-import {AiService, ChampionBuilds} from './services/ai.service';
+import {AiService, ChampionOptimalBuild} from './services/ai.service';
 import {ConfigService} from './services/config.service';
 import {I18nService} from './services/i18n.service';
 import {MatIconModule} from '@angular/material/icon';
@@ -113,9 +113,9 @@ import {MatIconModule} from '@angular/material/icon';
           </div>
         }
 
-        @if (activeChampion() && builds() && !isLoading()) {
+        @if (activeChampion() && build() && !isLoading()) {
           <div class="flex-1 flex flex-col animate-in slide-in-from-bottom-4 fade-in duration-700 w-full">
-            <app-build-panel class="flex-1 flex" [builds]="builds()" />
+            <app-build-panel class="flex-1 flex" [build]="build()" />
           </div>
         }
         
@@ -139,7 +139,7 @@ export class App {
   t = (key: string) => this.i18n.t(key);
   
   activeChampion = signal<Champion | null>(null);
-  builds = signal<ChampionBuilds | null>(null);
+  build = signal<ChampionOptimalBuild | null>(null);
   isLoading = signal(false);
   errorMsg = signal<string | null>(null);
   gameMode = signal<'Normal' | 'ARAM Desordem'>('Normal');
@@ -164,7 +164,7 @@ export class App {
   async onChampionSelected(champion: Champion) {
     this.activeChampion.set(champion);
     this.errorMsg.set(null);
-    this.builds.set(null);
+    this.build.set(null);
     
     if (!this.config.apiKey()) {
       this.errorMsg.set('Você precisa configurar sua API Key do Gemini antes de continuar.');
@@ -177,7 +177,7 @@ export class App {
     try {
       const language = this.riotData.currentLanguage;
       const result = await this.aiService.generateBuilds(champion.name, this.gameMode(), language);
-      this.builds.set(result);
+      this.build.set(result);
     } catch (err: any) {
       console.error(err);
       this.errorMsg.set(err.message || 'Ocorreu um erro desconhecido.');
