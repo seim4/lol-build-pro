@@ -28,5 +28,5 @@ jobs:
       - name: Deploy para GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: dist/nome-do-seu-projeto/browser # Verifique se o caminho do build está correto (Angular 17+ usa /browser)
+          folder: dist/ai-studio-angular-app/browser # Verifique se o caminho do build está correto (Angular 17+ usa /browser)
           branch: gh-pages
